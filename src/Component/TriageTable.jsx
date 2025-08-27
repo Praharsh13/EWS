@@ -1,5 +1,6 @@
-import React, { useMemo } from "react";
+import React, { useMemo,useState } from "react";
 import { computeScore, scoreToStatus, statusMeta } from "../assets/triage";
+import PatientDetailDrawer from "./PatientDetailDrawer";
 
 // function AttributeChips({ attrsCatalog, selected }) {
 //   const items = attrsCatalog.filter(a => selected?.[a.id]);
@@ -85,111 +86,305 @@ import { computeScore, scoreToStatus, statusMeta } from "../assets/triage";
 //     </section>
 //   );
 // }
+// function initials(name = "") {
+//     return name
+//       .trim()
+//       .split(/\s+/)
+//       .slice(0,2)
+//       .map((s) => s[0]?.toUpperCase() || "")
+//       .join("");
+//   }
+  
+//   function AttributeChips({ attrsCatalog, selected, maxShow = 4 }) {
+//     const items = attrsCatalog.filter(a => selected?.[a.id]);
+//     if (items.length === 0) return <span className="cell-muted">—</span>;
+//     const show = items.slice(0, maxShow);
+//     const more = Math.max(0, items.length - show.length);
+//     return (
+//       <div className="attr-stack">
+//         {show.map(a => (
+//           <span key={a.id} className="attr-chip" title={a.label}>
+//             <span className="attr-dot" style={{background:a.color}} aria-hidden />
+//             {a.label}
+//           </span>
+//         ))}
+//         {more > 0 && <span className="attr-more">+{more} more</span>}
+//       </div>
+//     );
+//   }
+  
+//   function ScoreBar({ score, max, color }) {
+//     const pct = Math.min(100, Math.round((score / Math.max(1, max)) * 100));
+//     return (
+//       <div className="score-wrap">
+//         <div className="score-track" title={`${score} / ${max}`}>
+//           <div className="score-fill" style={{width:`${pct}%`, background: color}} />
+//         </div>
+//         <span className="score-text">{score}/{max}</span>
+//       </div>
+//     );
+//   }
+  
+//   export default function TriageTable({ patients, attributes, thresholds }) {
+//     const maxPossible = useMemo(
+//       () => attributes.reduce((s,a)=>s+a.weight,0),
+//       [attributes]
+//     );
+  
+//     const rows = useMemo(
+//       () => patients.map(p => {
+//         const score = computeScore(p.attributes, attributes);
+//         const status = scoreToStatus(score, thresholds);
+//         const meta = statusMeta(status);
+//         return { ...p, score, status, meta };
+//       }),
+//       [patients, attributes, thresholds]
+//     );
+  
+//     return (
+//       <section className="table-card" aria-label="Patient triage table">
+//         <div className="table-head-accent" aria-hidden="true" />
+//         <div className="table-wrap">
+//           <table className="table">
+//             <thead>
+//               <tr>
+//                 <th className="nowrap">Patient</th>
+//                 <th className="nowrap">Age / Sex</th>
+//                 <th className="nowrap">Suspected</th>
+//                 <th>Attributes</th>
+//                 <th className="nowrap" style={{width:230}}>Risk score</th>
+//                 <th className="nowrap">Status</th>
+//                 <th className="nowrap"></th>
+//               </tr>
+//             </thead>
+//             <tbody>
+//               {rows.map(r => (
+//                 <tr key={r.id} className={`row ${r.status}`}>
+//                   <td>
+//                     <div className="identity">
+//                       <div className="avatar" aria-hidden>{initials(r.name)}</div>
+//                       <div>
+//                         <div className="font-medium ellipsis" title={r.name}>{r.name}</div>
+//                         <div className="cell-muted ellipsis" title={r.id}>{r.id}</div>
+//                       </div>
+//                     </div>
+//                   </td>
+//                   <td className="nowrap">{r.age} / {r.sex}</td>
+//                   <td className="nowrap">{r.suspected}</td>
+//                   <td>
+//                     <AttributeChips attrsCatalog={attributes} selected={r.attributes} />
+//                   </td>
+//                   <td>
+//                     <ScoreBar score={r.score} max={maxPossible} color={r.meta.color} />
+//                   </td>
+//                   <td>
+//                     <span className="status-pill" title={r.meta.blurb}>
+//                       <span className="status-dot" style={{background:r.meta.color}} aria-hidden />
+//                       {r.meta.label}
+//                     </span>
+//                   </td>
+//                   <td className="nowrap">
+//                     <button className="btn-ghost">View</button>
+//                   </td>
+//                 </tr>
+//               ))}
+//             </tbody>
+//           </table>
+//         </div>
+//       </section>
+//     );
+//   }
+
 function initials(name = "") {
-    return name
-      .trim()
-      .split(/\s+/)
-      .slice(0,2)
-      .map((s) => s[0]?.toUpperCase() || "")
-      .join("");
-  }
-  
-  function AttributeChips({ attrsCatalog, selected, maxShow = 4 }) {
-    const items = attrsCatalog.filter(a => selected?.[a.id]);
-    if (items.length === 0) return <span className="cell-muted">—</span>;
-    const show = items.slice(0, maxShow);
-    const more = Math.max(0, items.length - show.length);
-    return (
-      <div className="attr-stack">
-        {show.map(a => (
-          <span key={a.id} className="attr-chip" title={a.label}>
-            <span className="attr-dot" style={{background:a.color}} aria-hidden />
-            {a.label}
-          </span>
-        ))}
-        {more > 0 && <span className="attr-more">+{more} more</span>}
+  return name.trim().split(/\s+/).slice(0,2).map(s => s[0]?.toUpperCase() || "").join("");
+}
+
+/* attribute chips (kept) */
+function AttributeChips({ attrsCatalog, selected, maxShow = 4 }) {
+  const items = attrsCatalog.filter(a => selected?.[a.id]);
+  if (items.length === 0) return <span className="cell-muted">—</span>;
+  const show = items.slice(0, maxShow);
+  const more = Math.max(0, items.length - show.length);
+  return (
+    <div className="attr-stack">
+      {show.map(a => (
+        <span key={a.id} className="attr-chip" title={a.label}>
+          <span className="attr-dot" style={{background:a.color}} aria-hidden />
+          {a.label}
+        </span>
+      ))}
+      {more > 0 && <span className="attr-more">+{more} more</span>}
+    </div>
+  );
+}
+
+/* cancers as chips (new) */
+function CancerChips({ cancers = [] }) {
+  if (!cancers.length) return <span className="cell-muted">—</span>;
+  const palette = ["#60a5fa","#f472b6","#10b981","#f59e0b","#a78bfa","#fb7185"]; // rotating
+  return (
+    <div className="cancer-stack">
+      {cancers.map((c, i) => (
+        <span key={c + i} className="cancer-chip" title={c}>
+          <span className="cancer-dot" style={{ background: palette[i % palette.length] }} />
+          {c}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function ScoreBar({ score, max, color }) {
+  const pct = Math.min(100, Math.round((score / Math.max(1, max)) * 100));
+  return (
+    <div className="score-wrap">
+      <div className="score-track" title={`${score} / ${max}`}>
+        <div className="score-fill" style={{width:`${pct}%`, background: color}} />
       </div>
-    );
+      <span className="score-text">{score}/{max}</span>
+    </div>
+  );
+}
+
+export default function TriageTable({ patients, attributes, thresholds }) {
+  /* ===== Toolbar state ===== */
+  const [query, setQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");   // all | low | yellow | red | incomplete | surveillance
+  const [filterCancer, setFilterCancer] = useState("all");   // all or a specific cancer
+  const [open, setOpen] = useState(false);
+  const [current, setCurrent] = useState(null);
+
+  /* build lookup & meta */
+  const maxPossible = useMemo(() => attributes.reduce((s,a)=>s+a.weight,0), [attributes]);
+
+  // derive a flat list of cancers from patient data (supports multi-cancer arrays)
+  const cancerOptions = useMemo(() => {
+    const set = new Set();
+    patients.forEach(p => (p.cancers || (p.suspected ? [p.suspected] : [])).forEach(c => set.add(c)));
+    return Array.from(set).sort();
+  }, [patients]);
+
+  // enrich patients → score + status + meta
+  const enriched = useMemo(
+    () => patients.map(p => {
+      const score = computeScore(p.attributes, attributes);
+      const status = scoreToStatus(p, score, thresholds);
+      const meta = statusMeta(status);
+      const cancers = p.cancers || (p.suspected ? [p.suspected] : []);
+      return { ...p, cancers, score, status, meta };
+    }),
+    [patients, attributes, thresholds]
+  );
+
+  // filtering
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return enriched.filter(r => {
+      const matchesQ = !q || `${r.name} ${r.id}`.toLowerCase().includes(q);
+      const matchesStatus = filterStatus === "all" || r.status === filterStatus;
+      const matchesCancer = filterCancer === "all" || r.cancers.includes(filterCancer);
+      return matchesQ && matchesStatus && matchesCancer;
+    });
+  }, [enriched, query, filterStatus, filterCancer]);
+  function onView(p) {
+    setCurrent(p);
+    setOpen(true);
   }
-  
-  function ScoreBar({ score, max, color }) {
-    const pct = Math.min(100, Math.round((score / Math.max(1, max)) * 100));
-    return (
-      <div className="score-wrap">
-        <div className="score-track" title={`${score} / ${max}`}>
-          <div className="score-fill" style={{width:`${pct}%`, background: color}} />
+
+  return (
+    <>
+    <section className="table-card" aria-label="Patient triage table">
+      {/* accent */}
+      <div className="table-head-accent" aria-hidden="true" />
+
+      {/* toolbar */}
+      <div className="table-toolbar">
+        <div className="toolbar-left">
+          <input
+            className="input-sm"
+            placeholder="Search patient or ID…"
+            value={query}
+            onChange={(e)=>setQuery(e.target.value)}
+          />
+          <select className="input-sm" value={filterStatus} onChange={(e)=>setFilterStatus(e.target.value)}>
+            <option value="all">All statuses</option>
+            <option value="low">Low risk</option>
+            <option value="yellow">Caution</option>
+            <option value="red">Urgent</option>
+            <option value="incomplete">Incomplete data</option>
+            <option value="surveillance">Ongoing surveillance</option>
+          </select>
+
+          <select className="input-sm" value={filterCancer} onChange={(e)=>setFilterCancer(e.target.value)}>
+            <option value="all">All cancers</option>
+            {cancerOptions.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
         </div>
-        <span className="score-text">{score}/{max}</span>
+
+        <div className="toolbar-right legend">
+          <span><i className="dot low" /> Low</span>
+          <span><i className="dot yellow" /> Caution</span>
+          <span><i className="dot red" /> Urgent</span>
+          <span><i className="dot incomplete" /> Incomplete</span>
+          <span><i className="dot surveillance" /> Surveillance</span>
+        </div>
       </div>
-    );
-  }
-  
-  export default function TriageTable({ patients, attributes, thresholds }) {
-    const maxPossible = useMemo(
-      () => attributes.reduce((s,a)=>s+a.weight,0),
-      [attributes]
-    );
-  
-    const rows = useMemo(
-      () => patients.map(p => {
-        const score = computeScore(p.attributes, attributes);
-        const status = scoreToStatus(score, thresholds);
-        const meta = statusMeta(status);
-        return { ...p, score, status, meta };
-      }),
-      [patients, attributes, thresholds]
-    );
-  
-    return (
-      <section className="table-card" aria-label="Patient triage table">
-        <div className="table-head-accent" aria-hidden="true" />
-        <div className="table-wrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th className="nowrap">Patient</th>
-                <th className="nowrap">Age / Sex</th>
-                <th className="nowrap">Suspected</th>
-                <th>Attributes</th>
-                <th className="nowrap" style={{width:230}}>Risk score</th>
-                <th className="nowrap">Status</th>
-                <th className="nowrap"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map(r => (
-                <tr key={r.id} className={`row ${r.status}`}>
-                  <td>
-                    <div className="identity">
-                      <div className="avatar" aria-hidden>{initials(r.name)}</div>
-                      <div>
-                        <div className="font-medium ellipsis" title={r.name}>{r.name}</div>
-                        <div className="cell-muted ellipsis" title={r.id}>{r.id}</div>
-                      </div>
+
+      {/* table */}
+      <div className="table-wrap">
+        <table className="table">
+          <thead>
+            <tr>
+              <th className="nowrap">Patient</th>
+              <th className="nowrap">Age / Sex</th>
+              <th className="nowrap">Cancers</th>
+              <th>Attributes</th>
+              <th className="nowrap" style={{width:230}}>Risk score</th>
+              <th className="nowrap">Status</th>
+              <th className="nowrap"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map(r => (
+              <tr key={r.id} className={`row ${r.status}`}>
+                <td>
+                  <div className="identity">
+                    <div className="avatar" aria-hidden>{initials(r.name)}</div>
+                    <div>
+                      <div className="font-medium ellipsis" title={r.name}>{r.name}</div>
+                      <div className="cell-muted ellipsis" title={r.id}>{r.id}</div>
                     </div>
-                  </td>
-                  <td className="nowrap">{r.age} / {r.sex}</td>
-                  <td className="nowrap">{r.suspected}</td>
-                  <td>
-                    <AttributeChips attrsCatalog={attributes} selected={r.attributes} />
-                  </td>
-                  <td>
-                    <ScoreBar score={r.score} max={maxPossible} color={r.meta.color} />
-                  </td>
-                  <td>
-                    <span className="status-pill" title={r.meta.blurb}>
-                      <span className="status-dot" style={{background:r.meta.color}} aria-hidden />
-                      {r.meta.label}
-                    </span>
-                  </td>
-                  <td className="nowrap">
-                    <button className="btn-ghost">View</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-    );
-  }
+                  </div>
+                </td>
+                <td className="nowrap">{r.age} / {r.sex}</td>
+                <td><CancerChips cancers={r.cancers} /></td>
+                <td><AttributeChips attrsCatalog={attributes} selected={r.attributes} /></td>
+                <td><ScoreBar score={r.score} max={maxPossible} color={r.meta.color} /></td>
+                <td>
+                  <span className="status-pill" title={r.meta.blurb}>
+                    <span className="status-dot" style={{background:r.meta.color}} aria-hidden />
+                    {r.meta.label}
+                  </span>
+                </td>
+                <td className="nowrap">
+                  <button className="btn-ghost" onClick={()=>onView(r)}>View</button>
+                </td>
+              </tr>
+            ))}
+            {filtered.length === 0 && (
+              <tr><td colSpan={7} className="cell-muted" style={{padding:'16px'}}>No patients match your filters.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    {/* Drawer */}
+    <PatientDetailDrawer
+        open={open}
+        patient={current}
+        attributesCatalog={attributes}
+        onClose={()=>setOpen(false)}
+      />
+    </>
+  );
+}
