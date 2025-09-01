@@ -1,4 +1,4 @@
-import React,{useState} from "react";
+import React,{useState,useMemo} from "react";
 //import Header from "./Component/Header.jsx";
 import KpiCard from "./Component/KpiCard.jsx";
 import CancerDeathsBar from "./Component/CancerDeathBar.jsx";
@@ -17,6 +17,7 @@ import { visitorKpis } from "./data/visitorMetrics.js";
 import { useAuth } from "./context/AuthContext";
 import AuthBar from "./Component/AuthBar.jsx";
 import LoginCard from "./Component/LoginCard.jsx";
+import MetricsPanel from "./Component/MetricsPanel.jsx"
 
 // export default function App() {
 //   return (
@@ -464,6 +465,12 @@ import LoginCard from "./Component/LoginCard.jsx";
 //   );
 // }
 
+import {
+  ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  PieChart, Pie, Cell, LineChart, Line
+} from "recharts";
+
+
 export default function App() {
   const { user } = useAuth();
   const [view, setView] = useState("dashboard"); // dashboard | triage | anotherPage
@@ -486,7 +493,7 @@ export default function App() {
         <section className="section">
           <div className="section-head">
             <div>
-              <div className="section-title">Overview (Visitor)</div>
+              <div className="section-title">Overview </div>
               <div className="section-sub">High-level activity across the platform</div>
             </div>
           </div>
@@ -525,6 +532,7 @@ export default function App() {
           <button className="btn btn-secondary" onClick={() => setView("triage")}>
             🚦 Patient Triage
           </button>
+          <button className="btn btn-outline" onClick={() => setView("metrics")}>📈 Metrics</button>
         </div>
       </section>
 
@@ -588,8 +596,8 @@ export default function App() {
 
           <section className="section">
             <MatteFeature image="/problem.png">
-              <p><b>Context matters.</b> Structured attributes, imaging cues, and longitudinal records reduce misses.</p>
-              <p className="mt-1">Triage explains <i>why</i> a patient is green/yellow/red, then links to details.</p>
+             
+             
             </MatteFeature>
           </section>
         </>
@@ -611,6 +619,18 @@ export default function App() {
           />
         </section>
       )}
+
+{view === "metrics" && (
+  <section className="section">
+    <div className="section-head">
+      <div>
+        <div className="section-title">Cohort Metrics</div>
+        <div className="section-sub">Detected cancers, demographics & attributes</div>
+      </div>
+    </div>
+    <MetricsPanel patients={PATIENTS} />
+  </section>
+)}
     </div>
   );
 }

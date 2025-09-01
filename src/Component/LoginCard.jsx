@@ -28,7 +28,7 @@ export default function LoginCard() {
           <div className="section-title">Sign in to continue</div>
           <div className="section-sub">Use demo credentials to view the full dashboard.</div>
         </div>
-        <div className="auth-demo muted">Demo • admin / demo123</div>
+        <div className="auth-demo muted"></div>
       </header>
 
       <form onSubmit={onSubmit} className="form">
