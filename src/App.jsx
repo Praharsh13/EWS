@@ -485,7 +485,7 @@ export default function App() {
             video="/ewslogo.mp4"
             image="/vision.png"
             title="EWS Predict: AI Cancer Risk Identification Dashboard"
-            subtitle="Welcome. Sign in to view live KPIs, charts and triage."
+            subtitle="Welcome. Sign in to view live KPIs, data visualization and triage."
             
           />
         </section>
@@ -522,7 +522,7 @@ export default function App() {
           video="/ewslogo.mp4"
           image="/vision.png"
           title="EWS Predict: AI Cancer Risk Identification Dashboard"
-          subtitle="Live operational view — choose a workspace."
+          subtitle="Live operational view"
           right={<AuthBar />}
         />
         <div className="mt-6 flex flex-wrap gap-4">
@@ -532,7 +532,7 @@ export default function App() {
           <button className="btn btn-secondary" onClick={() => setView("triage")}>
             🚦 Patient Triage
           </button>
-          <button className="btn btn-outline" onClick={() => setView("metrics")}>📈 Metrics</button>
+          <button className="btn btn-outline" onClick={() => setView("metrics")}>📈 Cohort Metrics</button>
           <button className="btn btn-accent" onClick={() => setView("ewi")}>
     👥 EWI Team
   </button>
