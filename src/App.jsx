@@ -484,13 +484,13 @@ export default function App() {
           <DashboardHero
             video="/ewslogo.mp4"
             image="/vision.png"
-            title="AI Cancer Detection Dashboard"
+            title="EWS Predict: AI Cancer Risk Identification Dashboard"
             subtitle="Welcome. Sign in to view live KPIs, charts and triage."
-            right={<AuthBar />}
+            
           />
         </section>
 
-        <section className="section">
+        {/* <section className="section">
           <div className="section-head">
             <div>
               <div className="section-title">Overview </div>
@@ -502,7 +502,7 @@ export default function App() {
               <KpiCard key={k.label} {...k} />
             ))}
           </div>
-        </section>
+        </section> */}
 
         <section className="section">
             <LoginCard />
@@ -521,7 +521,7 @@ export default function App() {
         <DashboardHero
           video="/ewslogo.mp4"
           image="/vision.png"
-          title="AI Cancer Detection Dashboard"
+          title="EWS Predict: AI Cancer Risk Identification Dashboard"
           subtitle="Live operational view — choose a workspace."
           right={<AuthBar />}
         />
@@ -533,6 +533,9 @@ export default function App() {
             🚦 Patient Triage
           </button>
           <button className="btn btn-outline" onClick={() => setView("metrics")}>📈 Metrics</button>
+          <button className="btn btn-accent" onClick={() => setView("ewi")}>
+    👥 EWI Team
+  </button>
         </div>
       </section>
 
@@ -631,6 +634,22 @@ export default function App() {
     <MetricsPanel patients={PATIENTS} />
   </section>
 )}
+{view === "ewi" && (
+  <section className="section">
+    <div className="section-head">
+      <div>
+        <div className="section-title">Overview</div>
+        <div className="section-sub">High-level activity across the platform</div>
+      </div>
+    </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {visitorKpis.map((k) => (
+        <KpiCard key={k.label} {...k} />
+      ))}
+    </div>
+  </section>
+)}
+
     </div>
   );
 }

@@ -458,3 +458,13 @@ html, body, #root { background: var(--bg) !important; color: var(--fg); }
 .mt-1{ margin-top:.5rem; }
 
 
+.table-footer{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 14px; border-top:1px solid var(--card-border);
+  background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.06));
+}
+.pager{ display:flex; align-items:center; gap:6px; }
+.pager-info{ min-width:64px; text-align:center; }
+
+
+
