@@ -18,6 +18,8 @@ import { useAuth } from "./context/AuthContext";
 import AuthBar from "./Component/AuthBar.jsx";
 import LoginCard from "./Component/LoginCard.jsx";
 import MetricsPanel from "./Component/MetricsPanel.jsx"
+import "leaflet/dist/leaflet.css";
+import PatientMap from "./Component/PatientMap.jsx";
 
 // export default function App() {
 //   return (
@@ -476,66 +478,104 @@ export default function App() {
   const [view, setView] = useState("dashboard"); // dashboard | triage | anotherPage
   const othersGlobal = Math.max(0, 100 - (genderRatio.male + genderRatio.female));
 
+  // if (!user) {
+  //   // Visitor view (same as before)
+  //   return (
+  //     <div className="min-h-screen app-bg">
+  //       <section className="section">
+  //         <DashboardHero
+  //           video="/ewslogo.mp4"
+  //           image="/vision.png"
+  //           title="EWS Predict: AI Cancer Risk Identification Dashboard"
+  //           subtitle="Welcome. Sign in to view live KPIs, data visualization and triage."
+            
+  //         />
+  //       </section>
+
+  //       {/* <section className="section">
+  //         <div className="section-head">
+  //           <div>
+  //             <div className="section-title">Overview </div>
+  //             <div className="section-sub">High-level activity across the platform</div>
+  //           </div>
+  //         </div>
+  //         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+  //           {visitorKpis.map((k) => (
+  //             <KpiCard key={k.label} {...k} />
+  //           ))}
+  //         </div>
+  //       </section> */}
+
+  //       <section className="section">
+  //           <LoginCard />
+  //         </section>
+
+  //         <div className="section"><div className="hr-line" /></div>
+  //     </div>
+  //   );
+  // }
+
   if (!user) {
-    // Visitor view (same as before)
     return (
       <div className="min-h-screen app-bg">
-        <section className="section">
+        <section className="section">{/* ← removed hero-compact */}
           <DashboardHero
             video="/ewslogo.mp4"
             image="/vision.png"
             title="EWS Predict: AI Cancer Risk Identification Dashboard"
             subtitle="Welcome. Sign in to view live KPIs, data visualization and triage."
-            
           />
         </section>
-
-        {/* <section className="section">
-          <div className="section-head">
-            <div>
-              <div className="section-title">Overview </div>
-              <div className="section-sub">High-level activity across the platform</div>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {visitorKpis.map((k) => (
-              <KpiCard key={k.label} {...k} />
-            ))}
-          </div>
-        </section> */}
-
+  
         <section className="section">
-            <LoginCard />
-          </section>
-
-          <div className="section"><div className="hr-line" /></div>
+          <LoginCard />
+        </section>
+  
+        <div className="section"><div className="hr-line" /></div>
       </div>
     );
   }
+  
 
   // Logged-in user views
   return (
+    // <div className="min-h-screen app-bg">
+    //   {/* HERO with nav buttons */}
+    //   <section className="section">
+    //     <DashboardHero
+    //       video="/ewslogo.mp4"
+    //       image="/vision.png"
+    //       title="EWS Predict: AI Cancer Risk Identification Dashboard"
+    //       subtitle="Live operational view"
+    //       right={<AuthBar />}
+    //     />
     <div className="min-h-screen app-bg">
-      {/* HERO with nav buttons */}
-      <section className="section">
-        <DashboardHero
-          video="/ewslogo.mp4"
-          image="/vision.png"
-          title="EWS Predict: AI Cancer Risk Identification Dashboard"
-          subtitle="Live operational view"
-          right={<AuthBar />}
-        />
+    <header className="topbar">
+      <AuthBar />
+    </header>
+
+    <section className="section hero-compact">{/* ← compact only when logged in */}
+      <DashboardHero
+        video="/ewslogo.mp4"
+        image="/vision.png"
+        title="EWS Predict: AI Cancer Risk Identification Dashboard"
+        subtitle="Live operational view"
+      />
         <div className="mt-6 flex flex-wrap gap-4">
           <button className="btn btn-primary" onClick={() => setView("dashboard")}>
             📊 Dashboard
           </button>
           <button className="btn btn-secondary" onClick={() => setView("triage")}>
-            🚦 Patient Triage
+            🚦 Patient Alert
           </button>
           <button className="btn btn-outline" onClick={() => setView("metrics")}>📈 Cohort Metrics</button>
           <button className="btn btn-accent" onClick={() => setView("ewi")}>
-    👥 EWI Team
+
+    👥 EWS Team
   </button>
+ 
+<button className="btn btn-outline" onClick={() => setView("map")}>🗺️ Case Map</button>
+
         </div>
       </section>
 
@@ -546,15 +586,22 @@ export default function App() {
             <div className="section-head">
               <div>
                 <div className="section-title">Key Metrics</div>
-                <div className="section-sub">Model performance & current load</div>
+                <div className="section-sub">Model performance & current information</div>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <KpiCard label="Detection Rate" value="92%" trend="+1.2%" icon="🧠" />
               <KpiCard label="False Positives" value="5%" trend="-0.4%" icon="⚖️" />
               <KpiCard label="False Negatives" value="3%" trend="+0.1%" icon="🧪" />
               <KpiCard label="Active Alerts" value="7" trend="+2" icon="🚨" />
-            </div>
+            </div> */}
+               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+  <KpiCard label="Active Red Alert"    value="3"   trend="+1" icon="🔴" variant="rose" />
+  <KpiCard label="Active Yellow Alert" value="5"   trend="0"  icon="🟡" variant="amber" />
+  <KpiCard label="Patient Volume"       value="M: 120 • F: 95" trend="+4" icon="👥" variant="teal" />
+  <KpiCard label="Visits per Day"       value="240" trend="+12" icon="📅" variant="brand" />
+  <KpiCard label="Last Data Feed"       value="2025-09-14 10:45" trend="—" icon="⏱" variant="slate" span={1}  />
+</div>
           </section>
 
           <section className="section">
@@ -643,10 +690,25 @@ export default function App() {
       </div>
     </div>
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <KpiCard label="Detection Rate" value="92%" trend="+1.2%" icon="🧠" />
+              <KpiCard label="False Positives" value="5%" trend="-0.4%" icon="⚖️" />
+              <KpiCard label="False Negatives" value="3%" trend="+0.1%" icon="🧪" />
+              <KpiCard label="Active Alerts" value="7" trend="+2" icon="🚨" />
+            </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      
+        
+      
+      
       {visitorKpis.map((k) => (
         <KpiCard key={k.label} {...k} />
       ))}
     </div>
+  </section>
+)}
+{view === "map" && (
+  <section className="section">
+    <PatientMap patients={PATIENTS} />
   </section>
 )}
 

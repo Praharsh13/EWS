@@ -78,7 +78,7 @@
 // ];
 
 
-export const PATIENTS = [
+export const RAW_PATIENTS = [
   {
     id: 'P-1021', name: 'Aarav Shah', age: 62, sex: 'M',
     cancers: ['Lung'],
@@ -398,3 +398,127 @@ export const PATIENTS = [
     riskProfile:{ probableCancers:[{type:'Breast', prob:0.26},{type:'Ovarian', prob:0.17}] }
   }
 ];
+
+// --- Care teams (keep as-is or edit) ---
+const CARE_GROUPS = [
+  "EWI Medical Group – East",
+  "EWI Medical Group – North",
+  "EWI Medical Group – Central",
+];
+const PRACTITIONERS = [
+  "Dr. Patel", "Dr. Hughes", "Dr. Lewis", "Dr. Clarke", "Dr. Green", "Dr. Ahmed",
+  "Dr. Turner", "Dr. Wallace", "Dr. Byrne", "Dr. O’Neill", "Dr. Reed", "Dr. McKay",
+  "Dr. Fox", "Dr. Hardy", "Dr. Khan", "Dr. Singh", "Dr. Mason", "Dr. Allen",
+  "Dr. Shah", "Dr. White", "Dr. Grant", "Dr. Evans", "Dr. Martin"
+];
+
+// --- US city/ZIP pool (rotate through for mock data) ---
+// const US_LOCATIONS = [
+//   { city: "San Francisco, CA", zip: "94103" },
+//   { city: "New York, NY",      zip: "10001" },
+//   { city: "Boston, MA",        zip: "02108" },
+//   { city: "Chicago, IL",       zip: "60601" },
+//   { city: "Dallas, TX",        zip: "75201" },
+//   { city: "Seattle, WA",       zip: "98101" },
+//   { city: "Los Angeles, CA",   zip: "90012" },
+//   { city: "Miami, FL",         zip: "33130" },
+//   { city: "Atlanta, GA",       zip: "30303" },
+//   { city: "Denver, CO",        zip: "80202" },
+// ];
+
+// // Force USA location (city+zip), preserving incoming city if you want
+// function withUSLocation(location = {}, i = 0) {
+//   const pick = US_LOCATIONS[i % US_LOCATIONS.length];
+//   return {
+//     // prefer provided city if it already looks US; else use pool
+//     city: location?.city && /, [A-Z]{2}$/.test(location.city) ? location.city : pick.city,
+//     country: "USA",
+//     zip: pick.zip,
+//   };
+// }
+const US_LOCATIONS = [
+  { city: "San Francisco, CA", zip: "94103", lat: 37.7749, lng: -122.4194 },
+  { city: "New York, NY",      zip: "10001", lat: 40.7484, lng: -73.9967 },
+  { city: "Boston, MA",        zip: "02108", lat: 42.3587, lng: -71.0636 },
+  { city: "Chicago, IL",       zip: "60601", lat: 41.8864, lng: -87.6186 },
+  { city: "Dallas, TX",        zip: "75201", lat: 32.7876, lng: -96.7996 },
+  { city: "Seattle, WA",       zip: "98101", lat: 47.6101, lng: -122.3344 },
+  { city: "Los Angeles, CA",   zip: "90012", lat: 34.0614, lng: -118.2436 },
+  { city: "Miami, FL",         zip: "33130", lat: 25.7680, lng: -80.2000 },
+  { city: "Atlanta, GA",       zip: "30303", lat: 33.7529, lng: -84.3925 },
+  { city: "Denver, CO",        zip: "80202", lat: 39.7525, lng: -104.9995 },
+];
+
+// Force USA location (city+zip), preserving incoming city if you want
+function withUSLocation(location = {}, i = 0) {
+  const pick = US_LOCATIONS[i % US_LOCATIONS.length];
+  const useProvidedUSCity = location?.city && /, [A-Z]{2}$/.test(location.city);
+  // pick coords from the pool always (demo-friendly & deterministic)
+  return {
+    city: useProvidedUSCity ? location.city : pick.city,
+    country: "USA",
+    zip: pick.zip,
+    lat: pick.lat,
+    lng: pick.lng,
+  };
+}
+
+const INSURANCE_PLANS = ["BCBS HMO", "BCBS PPO"];
+
+// Pick white/gray/yellow/red only (table already handles colors)
+// Derive a concise "major diagnosis" from imaging/labs/notes/history
+function deriveMajorDiagnosis(p = {}) {
+  const img = p.lastCheckup?.imaging?.[0];
+  if (img?.impression) return img.impression;
+  if (img?.result) return img.result;
+
+  const lab = p.lastCheckup?.labs?.find(l =>
+    typeof l.value === "string" && /positive|high|elevated|\+/.test(l.value.toLowerCase())
+  );
+  if (lab) return `${lab.test}: ${lab.value}`;
+
+  if (p.lastCheckup?.notes) return p.lastCheckup.notes.split(".")[0];
+
+  if (Array.isArray(p.history) && p.history.length) return p.history[0];
+  if (Array.isArray(p.cancers) && p.cancers.length) return p.cancers[0];
+  return "";
+}
+
+function serviceFromAge(age) {
+  return typeof age === "number" && age < 18 ? "Pediatrics" : "Adult";
+}
+
+function assignInsurance(i) {
+  // deterministic alternation using row index
+  return INSURANCE_PLANS[i % INSURANCE_PLANS.length];
+}
+
+// --- Final exported list: convert RAW patients → USA + careTeam ---
+// export const PATIENTS = RAW_PATIENTS.map((p, i) => ({
+//   ...p,
+//   location: withUSLocation(p.location, i),
+//   careTeam: p.careTeam ?? {
+//     group: CARE_GROUPS[i % CARE_GROUPS.length],
+//     practitioner: PRACTITIONERS[i % PRACTITIONERS.length],
+//   },
+//   // NEW fields used by the table
+//   service: serviceFromAge(p.age),                // "Adult" | "Pediatrics"
+//   insurance: p.insurance ?? assignInsurance(i),  // "BCBS HMO" | "BCBS PPO"
+//   majorDiagnosis: p.majorDiagnosis ?? deriveMajorDiagnosis(p),
+// }));
+
+export const PATIENTS = RAW_PATIENTS.map((p, i) => ({
+  ...p,
+  location: withUSLocation(p.location, i),
+  careTeam: p.careTeam ?? {
+    group: CARE_GROUPS[i % CARE_GROUPS.length],
+    practitioner: PRACTITIONERS[i % PRACTITIONERS.length],
+  },
+  service: p.service || (p.age < 18 ? "Pediatrics" : "Adult"),
+  insurance: p.insurance ?? (i % 2 === 0 ? "BCBS HMO" : "BCBS PPO"),
+  majorDiagnosis:
+    p.majorDiagnosis ??
+    (p.lastCheckup?.imaging?.[0]?.impression ||
+     p.lastCheckup?.imaging?.[0]?.result ||
+     p.history?.[0] || ""),
+}));
