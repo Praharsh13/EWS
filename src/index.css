@@ -720,3 +720,32 @@ html, body, #root { background: var(--bg) !important; color: var(--fg); }
 .popup-title{ font-weight:700; }
 .popup-id{ color: var(--muted); font-weight:400; }
 .popup-sub, .popup-row{ font-size:.9rem; margin-top:4px; }
+
+
+
+/* patients-map.css */
+
+/* Badge container */
+.pm-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: 600 11px/1.1 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  color: #111;
+  background: #fff;
+  border-radius: 12px;
+  padding: 2px 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.25), 0 0 0 1px rgba(0,0,0,.35);
+}
+.dark .pm-badge {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+/* Status dot */
+.pm-badge-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.35);
+}
