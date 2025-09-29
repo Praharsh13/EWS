@@ -21,7 +21,7 @@ import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from "recha
 export default function GenderRatioPie({
   male,
   female,
-  others = 0,
+  
   datasets,
   defaultCountry = "GLOBAL",
   showCountry = true,
@@ -31,8 +31,8 @@ export default function GenderRatioPie({
 
   const base = useMemo(() => {
     if (datasets && datasets.global) return datasets;
-    return { global: { male: male || 0, female: female || 0, others: others || 0 } };
-  }, [datasets, male, female, others]);
+    return { global: { male: male || 0, female: female  || 0 } };
+  }, [datasets, male, female]);
 
   const countryMap = base.byCountry || {};
   const countryKeys = Object.keys(countryMap);
@@ -42,10 +42,10 @@ export default function GenderRatioPie({
 
   const ratio = useMemo(() => {
     if (hasCountry && country !== "GLOBAL" && countryMap[country]) return countryMap[country];
-    return base.global || { male: 0, female: 0, others: 0 };
+    return base.global || { male: 0, female: 0 };
   }, [country, base, hasCountry, countryMap]);
 
-  const total = Math.max(1, (ratio.male || 0) + (ratio.female || 0) + (ratio.others || 0));
+  const total = Math.max(1, (ratio.male || 0) + (ratio.female || 0) );
   const malePct   = Math.round(((ratio.male   || 0) / total) * 100);
   const femalePct = Math.round(((ratio.female || 0) / total) * 100);
   const othersPct = Math.max(0, 100 - malePct - femalePct);
@@ -53,7 +53,7 @@ export default function GenderRatioPie({
   const data = [
     { name: "Male", value: malePct },
     { name: "Female", value: femalePct },
-    { name: "Others", value: othersPct },
+   ,
   ];
 
   const colors = {
@@ -97,7 +97,7 @@ export default function GenderRatioPie({
           >
             <Cell fill={colors.male} />
             <Cell fill={colors.female} />
-            <Cell fill={colors.others} />
+           
           </Pie>
 
           {/* Center text: percentages only */}
