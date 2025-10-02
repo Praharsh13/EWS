@@ -406,7 +406,7 @@ function AttributeChips({ attrsCatalog, selected, maxShow = 4 }) {
     <div className="attr-stack">
       {show.map(a => (
         <span key={a.id} className="attr-chip" title={a.label}>
-          <span className="attr-dot" style={{background:a.color}} aria-hidden />
+          <span className="attr" style={{background:a.color}} aria-hidden />
           {a.label}
         </span>
       ))}
@@ -422,7 +422,7 @@ function CancerChips({ cancers = [] }) {
     <div className="cancer-stack">
       {cancers.map((c, i) => (
         <span key={c + i} className="cancer-chip" title={c}>
-          <span className="cancer-dot" style={{ background: palette[i % palette.length] }} />
+          <span className="cancer-do" style={{ background: palette[i % palette.length] }} />
           {c}
         </span>
       ))}
@@ -905,6 +905,426 @@ function ScoreBar({ score, max, color }) {
 //   );
 // }
 
+function sexAvatarStyle(sex) {
+  if (sex === "M") return { background: "#2563eb", color: "#fff" };  // blue-600
+  if (sex === "F") return { background: "#ec4899", color: "#fff" };  // pink-500
+  return { background: "var(--chip-bg, #e2e8f0)", color: "var(--text, #0f172a)" };
+}
+
+
+// export default function TriageTable({ patients, attributes, thresholds }) {
+//   /* ===== Toolbar state ===== */
+//   const [query, setQuery] = useState("");
+//   const [filterStatus, setFilterStatus] = useState("all"); // all | yellow | red | incomplete | surveillance
+//   const [filterCancer, setFilterCancer] = useState("all");
+//   const [open, setOpen] = useState(false);
+//   const [current, setCurrent] = useState(null);
+
+//   /* ===== Pagination state ===== */
+//   const [page, setPage] = useState(1);
+//   const [pageSize, setPageSize] = useState(10); // 10 | 20 | 50
+
+//   /* Build lookup & meta */
+//   const maxPossible = useMemo(
+//     () => attributes.reduce((s, a) => s + a.weight, 0),
+//     [attributes]
+//   );
+
+//   const cancerOptions = useMemo(() => {
+//     const set = new Set();
+//     patients.forEach((p) =>
+//       (p.cancers || (p.suspected ? [p.suspected] : [])).forEach((c) =>
+//         set.add(c)
+//       )
+//     );
+//     return Array.from(set).sort();
+//   }, [patients]);
+
+//   // 4-status palette only
+//   function statusColor(status) {
+//     switch (status) {
+//       case "yellow":
+//         return "var(--warn)"; // yellow
+//       case "red":
+//         return "var(--danger)"; // red
+//       case "surveillance":
+//         return "var(--white)"; // white (we add inner ring)
+//       case "incomplete":
+//       default:
+//         return "var(--grey)"; // gray
+//     }
+//   }
+
+//   function statusLabel(status) {
+//     return (
+//       {
+//         incomplete: "Incomplete",
+//         yellow: "Caution",
+//         red: "Urgent",
+        
+//         surveillance: "Surveillance",
+//       }[status] || "Unknown"
+//     );
+//   }
+
+//   const enriched = useMemo(
+//     () =>
+//       patients.map((p) => {
+//         const score = computeScore(p.attributes, attributes);
+//         let status = scoreToStatus(p, score, thresholds);
+//         // Remove "low" entirely → treat as "incomplete"
+//         if (status === "low") status = "incomplete";
+
+//         const cancers = p.cancers || (p.suspected ? [p.suspected] : []);
+//         const color = statusColor(status);
+//         const meta = { color, label: statusLabel(status), blurb: statusLabel(status) };
+
+//         // Data layer enrichment (from PATIENTS mapping)
+//         const responsibleGroup = p.careTeam?.group || "";
+//         const responsiblePractitioner =
+//           p.careTeam?.practitioner || p.lastCheckup?.clinician || "";
+//         const majorDiagnosis = p.majorDiagnosis || "";
+//         const service = p.service; // "Adult" | "Pediatrics"
+//         const insurance = p.insurance || ""; // "BCBS HMO" | "BCBS PPO"
+
+//         return {
+//           ...p,
+//           cancers,
+//           score,
+//           status,
+//           meta,
+//           responsibleGroup,
+//           responsiblePractitioner,
+//           majorDiagnosis,
+//           service,
+//           insurance,
+//         };
+//       }),
+//     [patients, attributes, thresholds]
+//   );
+
+//   const filtered = useMemo(() => {
+//     const q = query.trim().toLowerCase();
+//     return enriched.filter((r) => {
+//       const matchesQ = !q || `${r.name} ${r.id}`.toLowerCase().includes(q);
+//       const matchesStatus = filterStatus === "all" || r.status === filterStatus;
+//       const matchesCancer =
+//         filterCancer === "all" || r.cancers.includes(filterCancer);
+//       return matchesQ && matchesStatus && matchesCancer;
+//     });
+//   }, [enriched, query, filterStatus, filterCancer]);
+
+//   /* Reset to page 1 whenever filters/search/pageSize change */
+//   useEffect(() => {
+//     setPage(1);
+//   }, [query, filterStatus, filterCancer, pageSize]);
+
+//   /* Pagination math */
+//   const total = filtered.length;
+//   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+//   const safePage = Math.min(page, totalPages);
+//   const startIdx = (safePage - 1) * pageSize;
+//   const endIdx = Math.min(total, startIdx + pageSize);
+//   const pageItems = filtered.slice(startIdx, endIdx);
+
+//   function onView(p) {
+//     setCurrent(p);
+//     setOpen(true);
+//   }
+//   function prevPage() {
+//     setPage((p) => Math.max(1, p - 1));
+//   }
+//   function nextPage() {
+//     setPage((p) => Math.min(totalPages, p + 1));
+//   }
+
+//   // Helpers
+//   function initials(name = "") {
+//     return name
+//       .split(/\s+/)
+//       .filter(Boolean)
+//       .slice(0, 2)
+//       .map((s) => s[0]?.toUpperCase() || "")
+//       .join("");
+//   }
+//   function rowKey(e, r) {
+//     if (e.key === "Enter" || e.key === " ") {
+//       e.preventDefault();
+//       onView(r);
+//     }
+//   }
+
+//   return (
+//     <>
+//       <section className="table-card" aria-label="Patient triage table">
+//         <div className="table-head-accent" aria-hidden="true" />
+
+//         {/* toolbar */}
+//         <div className="table-toolbar">
+//           <div className="toolbar-left">
+//             <input
+//               className="input-sm"
+//               placeholder="Search patient or #"
+//               value={query}
+//               onChange={(e) => setQuery(e.target.value)}
+//             />
+//             <select
+//               className="input-sm"
+//               value={filterStatus}
+//               onChange={(e) => setFilterStatus(e.target.value)}
+//             >
+//                <option value="incomplete">Incomplete</option>
+//               <option value="all">All statuses</option>
+//               <option value="yellow">Caution</option>
+//               <option value="red">Urgent</option>
+             
+//               <option value="surveillance">Surveillance</option>
+//             </select>
+
+//             <select
+//               className="input-sm"
+//               value={filterCancer}
+//               onChange={(e) => setFilterCancer(e.target.value)}
+//             >
+//               <option value="all">All cancers</option>
+//               {cancerOptions.map((c) => (
+//                 <option key={c} value={c}>
+//                   {c}
+//                 </option>
+//               ))}
+//             </select>
+//           </div>
+
+//           <div className="toolbar-right legend">
+//           <span>
+//               <i className="dot incomplete" /> Incomplete
+//             </span>
+
+//             <span>
+//               <i className="dot surveillance" /> Surveillance
+//             </span>
+
+//             <span>
+//               <i className="dot yellow" /> Caution
+//             </span>
+//             <span>
+//               <i className="dot red" /> Urgent
+//             </span>
+            
+           
+//           </div>
+//         </div>
+
+//         {/* table */}
+//         <div className="table-wrap">
+//           <table className="table">
+//             <thead>
+//               <tr>
+//                 <th className="nowrap">Patient</th>
+//                 <th className="nowrap">Age / Sex</th>
+//                 <th className="nowrap">Cancers</th>
+//                 <th className="nowrap">Suspicion</th>
+//                 <th>Attributes</th>
+//                 <th className="nowrap" style={{ width: 230 }}>
+//                   Risk score
+//                 </th>
+//                 <th className="nowrap">Status</th>
+//                 <th className="nowrap">Responsible Group</th>
+//                 <th className="nowrap">Responsible Practitioner</th>
+//                 <th className="nowrap">Major Diagnoses</th>
+//                 <th className="nowrap">Service</th>
+//                 <th className="nowrap">Insurance</th>
+//               </tr>
+//             </thead>
+
+//             <tbody>
+//               {pageItems.map((r) => {
+//                 const color = statusColor(r.status);
+//                 const isWhite = r.status === "surveillance";
+//                 return (
+//                   <tr
+//                     key={r.id}
+//                     className={`row ${r.status}`}
+//                     onClick={() => onView(r)}
+//                     onKeyDown={(e) => rowKey(e, r)}
+//                     tabIndex={0}
+//                     role="button"
+//                     aria-label={`Open ${r.name || r.id} details`}
+//                     style={{ cursor: "pointer" }}
+//                   >
+//                     {/* Patient: initials only (full name on hover) */}
+//                     <td>
+//                       <div className="identity">
+//                         <div className="avatar" aria-hidden>
+//                           {initials(r.name)}
+//                         </div>
+//                         <div className="id-text">
+//                           {/* <div className="font-medium ellipsis" title={r.name}>
+//                             {initials(r.name)}
+//                           </div> */}
+//                           {/* <div className="cell-muted ellipsis" title={r.id}>
+//                             {r.id}
+//                           </div> */}
+//                         </div>
+//                       </div>
+//                     </td>
+
+//                     <td className="nowrap">
+//                       {r.age} / {r.sex}
+//                     </td>
+
+//                     {/* Cancers */}
+//                     <td className="nowrap">
+//                       <CancerChips cancers={r.cancers} />
+//                     </td>
+
+                    
+//                     <td className="nowrap">
+//   <span
+//     title={`${r.meta.label} risk`}
+//     className="cancer-dot"
+//     style={{
+//       display: "inline-block",          // ← important
+//       width: 10,
+//       height: 10,
+//       borderRadius: "9999px",
+//       background: r.status === "surveillance" ? "#fff" : color,
+//       boxShadow:
+//         r.status === "surveillance"
+//           ? "inset 0 0 0 1px var(--card-border)" // ring on white dot
+//           : "none",
+//       verticalAlign: "middle",
+//     }}
+//   />
+// </td>
+
+//                     {/* Attributes */}
+//                     <td>
+//                       <AttributeChips
+//                         attrsCatalog={attributes}
+//                         selected={r.attributes}
+//                       />
+//                     </td>
+
+//                     {/* Score */}
+//                     <td>
+//                       <ScoreBar score={r.score} max={maxPossible} color={color} />
+//                     </td>
+
+//                     {/* Status */}
+//                     <td className="nowrap">
+//                       <span className="status-pill" title={r.meta.blurb}>
+//                         <span
+//                           className="status-dot"
+//                           style={{
+//                             background: color,
+//                             boxShadow: isWhite
+//                               ? "inset 0 0 0 1px var(--card-border)"
+//                               : undefined,
+//                           }}
+//                           aria-hidden
+//                         />
+//                         {r.meta.label}
+//                       </span>
+//                     </td>
+
+//                     {/* Extra columns */}
+//                     <td className="ellipsis" title={r.responsibleGroup || "-"}>
+//                       {r.responsibleGroup || "-"}
+//                     </td>
+//                     <td
+//                       className="ellipsis"
+//                       title={r.responsiblePractitioner || "-"}
+//                     >
+//                       {r.responsiblePractitioner || "-"}
+//                     </td>
+//                     <td className="ellipsis" title={r.majorDiagnosis || "-"}>
+//                       {r.majorDiagnosis || "-"}
+//                     </td>
+//                     <td className="nowrap">{r.service}</td>
+//                     <td className="nowrap">{r.insurance || "-"}</td>
+//                   </tr>
+//                 );
+//               })}
+
+//               {pageItems.length === 0 && (
+//                 <tr>
+//                   <td colSpan={12} className="cell-muted" style={{ padding: "16px" }}>
+//                     No patients match your filters.
+//                   </td>
+//                 </tr>
+//               )}
+//             </tbody>
+//           </table>
+//         </div>
+
+//         {/* pagination footer */}
+//         <div className="table-footer">
+//           <div className="muted text-sm">
+//             {total === 0 ? "0 results" : `${startIdx + 1}–${endIdx} of ${total}`}
+//           </div>
+//           <div className="pager">
+//             <select
+//               className="input-sm"
+//               value={pageSize}
+//               onChange={(e) => setPageSize(Number(e.target.value))}
+//               aria-label="Rows per page"
+//             >
+//               <option value={10}>10 / page</option>
+//               <option value={20}>20 / page</option>
+//               <option value={50}>50 / page</option>
+//             </select>
+
+//             <button
+//               className="btn-ghost"
+//               onClick={() => setPage(1)}
+//               disabled={safePage === 1}
+//               aria-label="First page"
+//             >
+//               «
+//             </button>
+//             <button
+//               className="btn-ghost"
+//               onClick={prevPage}
+//               disabled={safePage === 1}
+//               aria-label="Previous page"
+//             >
+//               ‹
+//             </button>
+//             <span className="pager-info">
+//               {safePage} / {totalPages}
+//             </span>
+//             <button
+//               className="btn-ghost"
+//               onClick={nextPage}
+//               disabled={safePage === totalPages}
+//               aria-label="Next page"
+//             >
+//               ›
+//             </button>
+//             <button
+//               className="btn-ghost"
+//               onClick={() => setPage(totalPages)}
+//               disabled={safePage === totalPages}
+//               aria-label="Last page"
+//             >
+//               »
+//             </button>
+//           </div>
+//         </div>
+//       </section>
+
+//       {/* Drawer */}
+//       <PatientDetailDrawer
+//         open={open}
+//         patient={current}
+//         attributesCatalog={attributes}
+//         onClose={() => setOpen(false)}
+//       />
+//     </>
+//   );
+// }
+
 export default function TriageTable({ patients, attributes, thresholds }) {
   /* ===== Toolbar state ===== */
   const [query, setQuery] = useState("");
@@ -951,9 +1371,9 @@ export default function TriageTable({ patients, attributes, thresholds }) {
   function statusLabel(status) {
     return (
       {
+        incomplete: "Incomplete",
         yellow: "Caution",
         red: "Urgent",
-        incomplete: "Incomplete",
         surveillance: "Surveillance",
       }[status] || "Unknown"
     );
@@ -1065,10 +1485,10 @@ export default function TriageTable({ patients, attributes, thresholds }) {
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
             >
+              <option value="incomplete">Incomplete</option>
               <option value="all">All statuses</option>
               <option value="yellow">Caution</option>
               <option value="red">Urgent</option>
-              <option value="incomplete">Incomplete</option>
               <option value="surveillance">Surveillance</option>
             </select>
 
@@ -1088,16 +1508,16 @@ export default function TriageTable({ patients, attributes, thresholds }) {
 
           <div className="toolbar-right legend">
             <span>
-              <i className="dot yellow" /> Caution
-            </span>
-            <span>
-              <i className="dot red" /> Urgent
-            </span>
-            <span>
               <i className="dot incomplete" /> Incomplete
             </span>
             <span>
               <i className="dot surveillance" /> Surveillance
+            </span>
+            <span>
+              <i className="dot yellow" /> Caution
+            </span>
+            <span>
+              <i className="dot red" /> Urgent
             </span>
           </div>
         </div>
@@ -1142,17 +1562,10 @@ export default function TriageTable({ patients, attributes, thresholds }) {
                     {/* Patient: initials only (full name on hover) */}
                     <td>
                       <div className="identity">
-                        <div className="avatar" aria-hidden>
+                        <div className="avatar" aria-hidden style={sexAvatarStyle(r.sex)}>
                           {initials(r.name)}
                         </div>
-                        <div className="id-text">
-                          {/* <div className="font-medium ellipsis" title={r.name}>
-                            {initials(r.name)}
-                          </div> */}
-                          {/* <div className="cell-muted ellipsis" title={r.id}>
-                            {r.id}
-                          </div> */}
-                        </div>
+                        <div className="id-text">{/* kept empty as before */}</div>
                       </div>
                     </td>
 
@@ -1160,45 +1573,33 @@ export default function TriageTable({ patients, attributes, thresholds }) {
                       {r.age} / {r.sex}
                     </td>
 
-                    {/* Cancers */}
-                    <td className="nowrap">
+                    {/* Cancers — plain (no dots/colors) */}
+                    <td className="nowrap no-decor">
                       <CancerChips cancers={r.cancers} />
                     </td>
 
-                    {/* Suspicion dot */}
-                    {/* <td className="nowrap">
+                    {/* Suspicion dot (unchanged) */}
+                    <td className="nowrap">
                       <span
                         title={`${r.meta.label} risk`}
                         className="cancer-dot"
                         style={{
-                          background: color,
-                          boxShadow: isWhite
-                            ? "inset 0 0 0 1px var(--card-border)"
-                            : undefined,
+                          display: "inline-block",
+                          width: 10,
+                          height: 10,
+                          borderRadius: "9999px",
+                          background: r.status === "surveillance" ? "#fff" : color,
+                          boxShadow:
+                            r.status === "surveillance"
+                              ? "inset 0 0 0 1px var(--card-border)"
+                              : "none",
+                          verticalAlign: "middle",
                         }}
                       />
-                    </td> */}
-                    <td className="nowrap">
-  <span
-    title={`${r.meta.label} risk`}
-    className="cancer-dot"
-    style={{
-      display: "inline-block",          // ← important
-      width: 10,
-      height: 10,
-      borderRadius: "9999px",
-      background: r.status === "surveillance" ? "#fff" : color,
-      boxShadow:
-        r.status === "surveillance"
-          ? "inset 0 0 0 1px var(--card-border)" // ring on white dot
-          : "none",
-      verticalAlign: "middle",
-    }}
-  />
-</td>
+                    </td>
 
-                    {/* Attributes */}
-                    <td>
+                    {/* Attributes — plain (no dots/colors) */}
+                    <td className="no-decor">
                       <AttributeChips
                         attrsCatalog={attributes}
                         selected={r.attributes}
@@ -1231,10 +1632,7 @@ export default function TriageTable({ patients, attributes, thresholds }) {
                     <td className="ellipsis" title={r.responsibleGroup || "-"}>
                       {r.responsibleGroup || "-"}
                     </td>
-                    <td
-                      className="ellipsis"
-                      title={r.responsiblePractitioner || "-"}
-                    >
+                    <td className="ellipsis" title={r.responsiblePractitioner || "-"}>
                       {r.responsiblePractitioner || "-"}
                     </td>
                     <td className="ellipsis" title={r.majorDiagnosis || "-"}>

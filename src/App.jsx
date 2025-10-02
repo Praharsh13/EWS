@@ -391,7 +391,7 @@ export default function App() {
   <KpiCard label="Active Red Alert"    value="3"   trend="+1" icon="🔴" variant="rose" />
   <KpiCard label="Active Yellow Alert" value="5"   trend="0"  icon="🟡" variant="amber" />
   <KpiCard label="Patient Volume"       value="M: 120 • F: 95" trend="+4" icon="👥" variant="teal" />
-  <KpiCard label="Visits per Day"       value="240" trend="+12" icon="📅" variant="brand" />
+  <KpiCard label="Avg Visits / Day"       value="240" trend="+12" icon="📅" variant="brand" />
   <KpiCard label="Last Data Feed"       value="2025-09-14 10:45" trend="—" icon="⏱" variant="slate" span={1}  />
 </div>
           </section>
@@ -450,7 +450,7 @@ export default function App() {
         <section className="section">
           <div className="section-head">
             <div>
-              <div className="section-title">Patient Triage</div>
+              <div className="section-title">Patient Alert</div>
               <div className="section-sub">Automatic scoring from attributes • traffic-light priority</div>
             </div>
           </div>
@@ -477,15 +477,21 @@ export default function App() {
   <section className="section">
     <div className="section-head">
       <div>
-        <div className="section-title">Overview</div>
+        <div className="section-title">Enhanced Metrics</div>
         <div className="section-sub">High-level activity across the platform</div>
       </div>
     </div>
+    
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <KpiCard label="Detection Rate" value="92%" trend="+1.2%" icon="🧠" />
+    <KpiCard label="Active Red Alert"    value="3"   trend="+1" icon="🔴" variant="rose" />
+  <KpiCard label="Active Yellow Alert" value="5"   trend="0"  icon="🟡" variant="amber" />
+  <KpiCard label="Patient Volume"       value="M: 120 • F: 95" trend="+4" icon="👥" variant="teal" />
+  {/* <KpiCard label="Visits per Day"       value="240" trend="+12" icon="📅" variant="brand" /> */}
+  <KpiCard label="Last Data Feed"       value="2025-09-14 10:45" trend="—" icon="⏱" variant="slate" span={1}  />
+              <KpiCard label="Total Patients" value="12,480" trend="+1.2%" icon="👥" />
               <KpiCard label="False Positives" value="5%" trend="-0.4%" icon="⚖️" />
               <KpiCard label="False Negatives" value="3%" trend="+0.1%" icon="🧪" />
-              <KpiCard label="Active Alerts" value="7" trend="+2" icon="🚨" />
+              <KpiCard label="Total Active Alerts" value="7" trend="+2" icon="🚨" />
             </div>
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       
